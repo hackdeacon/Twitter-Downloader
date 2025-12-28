@@ -184,14 +184,28 @@ function displayVideoPreview(videoData) {
 
     // Generate quality buttons
     qualityButtons.innerHTML = '';
-    videoData.qualities.forEach((quality) => {
+    videoData.qualities.forEach((quality, index) => {
         const button = createQualityButton(quality);
+        // Add staggered animation delay
+        button.style.animation = `fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${index * 0.05}s both`;
         qualityButtons.appendChild(button);
     });
 
-    // Show preview section with animation
+    // Show preview section with smooth animation
     videoPreview.classList.remove('hidden');
-    videoPreview.style.animation = 'fadeInUp 0.5s ease';
+    videoPreview.style.opacity = '0';
+    videoPreview.style.transform = 'translateY(20px)';
+
+    requestAnimationFrame(() => {
+        videoPreview.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+        videoPreview.style.opacity = '1';
+        videoPreview.style.transform = 'translateY(0)';
+    });
+
+    // Scroll to preview smoothly
+    setTimeout(() => {
+        videoPreview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 200);
 }
 
 /**
@@ -256,24 +270,36 @@ function showSuccessToast(message) {
         position: fixed;
         bottom: 2rem;
         left: 50%;
-        transform: translateX(-50%);
+        transform: translateX(-50%) translateY(100px);
         background: var(--success);
         color: white;
-        padding: 0.875rem 1.5rem;
-        border-radius: 8px;
-        box-shadow: var(--shadow-lg);
-        font-weight: 500;
-        font-size: 0.95rem;
+        padding: 1rem 1.75rem;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0, 186, 124, 0.3);
+        font-weight: 600;
+        font-size: 0.9375rem;
         z-index: 1000;
-        animation: fadeIn 0.3s ease, fadeOut 0.3s ease 2.5s;
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     `;
     toast.textContent = message;
 
     document.body.appendChild(toast);
 
+    // Trigger animation
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(-50%) translateY(0)';
+    });
+
+    // Fade out and remove
     setTimeout(() => {
-        toast.remove();
-    }, 2800);
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(-20px)';
+        setTimeout(() => {
+            toast.remove();
+        }, 400);
+    }, 2500);
 }
 
 // ========================================
@@ -285,6 +311,13 @@ function showSuccessToast(message) {
  */
 function showLoading() {
     loadingSpinner.classList.remove('hidden');
+    loadingSpinner.style.opacity = '0';
+    loadingSpinner.style.transform = 'scale(0.9)';
+    requestAnimationFrame(() => {
+        loadingSpinner.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        loadingSpinner.style.opacity = '1';
+        loadingSpinner.style.transform = 'scale(1)';
+    });
     downloadBtn.disabled = true;
     downloadBtn.style.opacity = '0.6';
     downloadBtn.style.cursor = 'not-allowed';
@@ -294,7 +327,15 @@ function showLoading() {
  * Hide loading spinner
  */
 function hideLoading() {
-    loadingSpinner.classList.add('hidden');
+    loadingSpinner.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+    loadingSpinner.style.opacity = '0';
+    loadingSpinner.style.transform = 'scale(0.9)';
+    setTimeout(() => {
+        loadingSpinner.classList.add('hidden');
+        loadingSpinner.style.transform = '';
+        loadingSpinner.style.opacity = '';
+        loadingSpinner.style.transition = '';
+    }, 300);
     downloadBtn.disabled = false;
     downloadBtn.style.opacity = '1';
     downloadBtn.style.cursor = 'pointer';
@@ -320,7 +361,15 @@ function hideError() {
  * Hide video preview
  */
 function hideVideoPreview() {
-    videoPreview.classList.add('hidden');
+    videoPreview.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+    videoPreview.style.opacity = '0';
+    videoPreview.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+        videoPreview.classList.add('hidden');
+        videoPreview.style.opacity = '';
+        videoPreview.style.transform = '';
+        videoPreview.style.transition = '';
+    }, 400);
 }
 
 // ========================================
